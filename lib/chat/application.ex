@@ -9,6 +9,7 @@ defmodule Chat.Application do
   def start(_type, _args) do
     children = [
       ChatWeb.Telemetry,
+      {Nx.Serving, serving: serving(), name: ChatServing},
       {DNSCluster, query: Application.get_env(:chat, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Chat.PubSub},
       # Start the Finch HTTP client for sending emails
@@ -23,6 +24,19 @@ defmodule Chat.Application do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Chat.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  def serving() do
+    mistral = {:local, "/home/toranb/sloth/model"}
+
+    {:ok, spec} = Bumblebee.load_spec(mistral, module: Bumblebee.Text.Mistral, architecture: :for_causal_language_modeling)
+    {:ok, model_info} = Bumblebee.load_model(mistral, spec: spec, type: :f16, backend: {EXLA.Backend, client: :host})
+
+    {:ok, tokenizer} = Bumblebee.load_tokenizer(mistral)
+    {:ok, generation_config} = Bumblebee.load_generation_config(mistral)
+
+    generation_config = Bumblebee.configure(generation_config, max_new_tokens: 500, no_repeat_ngram_length: 5, strategy: %{type: :multinomial_sampling, top_p: 0.6})
+    Bumblebee.Text.generation(model_info, tokenizer, generation_config, stream: true, defn_options: [compiler: EXLA])
   end
 
   # Tell Phoenix to update the endpoint configuration
