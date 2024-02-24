@@ -55,8 +55,8 @@ defmodule Chat.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bumblebee, "~> 0.5.2"},
-      {:exla, "~> 0.6"},
-      {:nx, "~> 0.6"},
+      {:exla, ">= 0.0.0"},
+      {:nx, "~> 0.7"},
       {:bandit, "~> 1.2"}
     ]
   end

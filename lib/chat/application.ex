@@ -27,16 +27,13 @@ defmodule Chat.Application do
   end
 
   def serving() do
-    mistral = {:local, "/home/toranb/sloth/model"}
+    mistral = {:hf, "mistralai/Mistral-7B-Instruct-v0.2"}
 
-    {:ok, spec} = Bumblebee.load_spec(mistral, module: Bumblebee.Text.Mistral, architecture: :for_causal_language_modeling)
-    {:ok, model_info} = Bumblebee.load_model(mistral, spec: spec, type: :f16, backend: {EXLA.Backend, client: :host})
-
+    {:ok, model_info} = Bumblebee.load_model(mistral, backend: {EXLA.Backend, client: :host}, type: :bf16)
     {:ok, tokenizer} = Bumblebee.load_tokenizer(mistral)
     {:ok, generation_config} = Bumblebee.load_generation_config(mistral)
-
     generation_config = Bumblebee.configure(generation_config, max_new_tokens: 500, no_repeat_ngram_length: 5, strategy: %{type: :multinomial_sampling, top_p: 0.6})
-    Bumblebee.Text.generation(model_info, tokenizer, generation_config, stream: true, defn_options: [compiler: EXLA])
+    Bumblebee.Text.generation(model_info, tokenizer, generation_config, compile: [batch_size: 1, sequence_length: 4096], stream: true, defn_options: [compiler: EXLA, lazy_transfers: :always])
   end
 
   # Tell Phoenix to update the endpoint configuration
