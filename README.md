@@ -16,3 +16,11 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
   * Docs: https://hexdocs.pm/phoenix
   * Forum: https://elixirforum.com/c/phoenix-forum
   * Source: https://github.com/phoenixframework/phoenix
+
+## Deploy to fly with GPU
+
+```
+fly apps create chat1999
+fly secrets set SECRET_KEY_BASE=2G+abc7fd49ktnGX9ay+e2StgxxH9ts+t5/i/MnNkc7wa5S38zLHRHoBic3SbXEQ
+fly deploy --ha=false
+```
