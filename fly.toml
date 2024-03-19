@@ -1,0 +1,39 @@
+# fly.toml app configuration file generated for chat1999 on 2024-03-14T16:37:52-05:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'chat1999'
+primary_region = 'ord'
+kill_signal = 'SIGTERM'
+
+[build]
+
+[env]
+  PHX_HOST = 'chat1999.fly.dev'
+  PORT = '8080'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+  [http_service.concurrency]
+    type = 'connections'
+    hard_limit = 1000
+    soft_limit = 1000
+
+[[vm]]
+  size = "performance-4x"
+  memory = "32gb"
+  gpu_kind = "a100-pcie-40gb"
+  cpu_kind = "performance"
+  cpus = 4
+
+[mounts]
+  source = "data"
+  destination = "/data/cache"
+  initial_size = "20gb"
