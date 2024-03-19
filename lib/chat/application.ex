@@ -29,11 +29,11 @@ defmodule Chat.Application do
   def serving() do
     mistral = {:hf, "mistralai/Mistral-7B-Instruct-v0.2"}
 
-    {:ok, model_info} = Bumblebee.load_model(mistral, backend: {EXLA.Backend, client: :cuda}, type: :bf16)
+    {:ok, model_info} = Bumblebee.load_model(mistral, type: :bf16, backend: {EXLA.Backend, client: :cuda})
     {:ok, tokenizer} = Bumblebee.load_tokenizer(mistral)
     {:ok, generation_config} = Bumblebee.load_generation_config(mistral)
     generation_config = Bumblebee.configure(generation_config, max_new_tokens: 500, no_repeat_ngram_length: 5, strategy: %{type: :multinomial_sampling, top_p: 0.6, top_k: 49})
-    Bumblebee.Text.generation(model_info, tokenizer, generation_config, stream: true, defn_options: [compiler: EXLA])
+    Bumblebee.Text.generation(model_info, tokenizer, generation_config, stream: true, compile: [batch_size: 1, sequence_length: [1024, 2048]], defn_options: [compiler: EXLA])
   end
 
   # Tell Phoenix to update the endpoint configuration
