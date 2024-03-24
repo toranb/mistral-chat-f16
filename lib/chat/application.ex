@@ -32,7 +32,18 @@ defmodule Chat.Application do
     {:ok, model_info} = Bumblebee.load_model(mistral, type: :bf16, backend: {EXLA.Backend, client: :cuda})
     {:ok, tokenizer} = Bumblebee.load_tokenizer(mistral)
     {:ok, generation_config} = Bumblebee.load_generation_config(mistral)
-    generation_config = Bumblebee.configure(generation_config, max_new_tokens: 500, no_repeat_ngram_length: 5, strategy: %{type: :multinomial_sampling, top_p: 0.6, top_k: 49})
+    generation_config = Bumblebee.configure(generation_config, max_new_tokens: 500, no_repeat_ngram_length: 6, strategy: %{type: :multinomial_sampling, top_p: 0.6, top_k: 59})
+    Bumblebee.Text.generation(model_info, tokenizer, generation_config, stream: true, compile: [batch_size: 1, sequence_length: [1024, 2048]], defn_options: [compiler: EXLA])
+  end
+
+  def gemma() do
+    gemma = {:hf, "google/gemma-7b-it"}
+
+    {:ok, tokenizer} = Bumblebee.load_tokenizer(gemma, type: :gemma)
+    {:ok, spec} = Bumblebee.load_spec(gemma, module: Bumblebee.Text.Gemma, architecture: :for_causal_language_modeling)
+    {:ok, model_info} = Bumblebee.load_model(gemma, type: :bf16, spec: spec, backend: {EXLA.Backend, client: :host})
+    {:ok, generation_config} = Bumblebee.load_generation_config(gemma, spec_module: Bumblebee.Text.Gemma)
+    generation_config = Bumblebee.configure(generation_config, max_new_tokens: 500, no_repeat_ngram_length: 6, strategy: %{type: :multinomial_sampling, top_p: 0.6, top_k: 59})
     Bumblebee.Text.generation(model_info, tokenizer, generation_config, stream: true, compile: [batch_size: 1, sequence_length: [1024, 2048]], defn_options: [compiler: EXLA])
   end
 
