@@ -36,6 +36,16 @@ defmodule Chat.Application do
     Bumblebee.Text.generation(model_info, tokenizer, generation_config, stream: true, compile: [batch_size: 1, sequence_length: [1024, 2048]], defn_options: [compiler: EXLA])
   end
 
+  def llama() do
+    llama = {:hf, "meta-llama/Meta-Llama-3.1-8B-Instruct", auth_token: "hf_abc123"}
+
+    {:ok, model_info} = Bumblebee.load_model(llama, type: :bf16, backend: {EXLA.Backend, client: :cuda})
+    {:ok, tokenizer} = Bumblebee.load_tokenizer(llama)
+    {:ok, generation_config} = Bumblebee.load_generation_config(llama)
+    generation_config = Bumblebee.configure(generation_config, max_new_tokens: 500, no_repeat_ngram_length: 6, strategy: %{type: :multinomial_sampling, top_p: 0.6, top_k: 59})
+    Bumblebee.Text.generation(model_info, tokenizer, generation_config, stream: true, compile: [batch_size: 1, sequence_length: [1024, 2048]], defn_options: [compiler: EXLA])
+  end
+
   def gemma() do
     gemma = {:hf, "google/gemma-7b-it"}
 
