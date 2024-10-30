@@ -54,9 +54,9 @@ defmodule Chat.MixProject do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
-      {:bumblebee, git: "https://github.com/elixir-nx/bumblebee", branch: "main"},
-      {:exla, ">= 0.0.0"},
-      {:nx, "~> 0.7"},
+      {:bumblebee, "~> 0.6"},
+      {:exla, "~> 0.9"},
+      {:nx, "~> 0.9"},
       {:bandit, "~> 1.2"}
     ]
   end
