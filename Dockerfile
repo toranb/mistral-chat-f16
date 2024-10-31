@@ -11,9 +11,9 @@
 #   - https://pkgs.org/ - resource for finding needed packages
 #   - Ex: hexpm/elixir:1.15.4-erlang-26.0.2-debian-bullseye-20230612-slim
 #
-ARG ELIXIR_VERSION=1.15.4
+ARG ELIXIR_VERSION=1.16.1
 ARG OTP_VERSION=26.0.2
-ARG DEBIAN_VERSION=bullseye-20230612-slim
+ARG DEBIAN_VERSION=bullseye-20240130-slim
 
 ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
 ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
@@ -31,7 +31,7 @@ RUN apt update -q && apt install -y ca-certificates wget && \
     dpkg -i /cuda-keyring.deb && apt update -q
 
 # Install nvidia GPU support
-RUN apt-get install -y cuda-nvcc-12-2 libcublas-12-2 libcudnn8
+RUN apt-get install -y cuda-nvcc-12-6 cuda-libraries-12-6 libcudnn9-cuda-12
 
 # prepare build dir
 WORKDIR /app
@@ -42,7 +42,7 @@ RUN mix local.hex --force && \
 
 # set build ENV
 ENV MIX_ENV="prod"
-ENV XLA_TARGET="cuda120"
+ENV XLA_TARGET="cuda12"
 ENV BUMBLEBEE_CACHE_DIR="/data/cache/bumblebee"
 ENV XLA_CACHE_DIR="/data/cache/xla"
 
@@ -87,7 +87,7 @@ RUN apt update -q && apt install -y ca-certificates wget && \
     wget -qO /cuda-keyring.deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb && \
     dpkg -i /cuda-keyring.deb && apt update -q
 
-RUN apt-get install -y --no-install-recommends cuda-nvcc-12-2 libcublas-12-2 libcudnn8
+RUN apt-get install -y --no-install-recommends cuda-nvcc-12-6 cuda-libraries-12-6 libcudnn9-cuda-12
 
 # Set the locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
@@ -101,7 +101,7 @@ RUN chown nobody /app
 
 # set runner ENV
 ENV MIX_ENV="prod"
-ENV XLA_TARGET="cuda120"
+ENV XLA_TARGET="cuda12"
 ENV BUMBLEBEE_CACHE_DIR="/data/cache/bumblebee"
 ENV XLA_CACHE_DIR="/data/cache/xla"
 
